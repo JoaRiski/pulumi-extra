@@ -1,0 +1,7 @@
+{
+  "name": "pulumi-k8s-extra",
+  "version": "0.1.0",
+  "repository": "https://github.com/JoaRiski/pulumi-k8s-extra",
+  "author": "Joa Riski",
+  "license": "MIT"
+}
