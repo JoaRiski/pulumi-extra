@@ -1,5 +1,5 @@
 {
-  "name": "pulumi-k8s-extra",
+  "name": "@joariski/pulumi-extra",
   "version": "0.1.0",
   "repository": "https://github.com/JoaRiski/pulumi-k8s-extra",
   "main": "./dist/index.js",
