@@ -2,6 +2,18 @@
   "name": "pulumi-k8s-extra",
   "version": "0.1.0",
   "repository": "https://github.com/JoaRiski/pulumi-k8s-extra",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc && npm pack"
+  },
+  "files": [
+    "dist/**"
+  ],
   "author": "Joa Riski",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.4.3"
+  }
 }
