@@ -15,5 +15,12 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@pulumi/gcp": "^5.20.0",
+    "@pulumi/kubernetes": "^3.7.2",
+    "@pulumi/pulumi": "^3.13.0",
+    "@types/lodash": "^4.14.173",
+    "lodash": "^4.17.21"
   }
 }
