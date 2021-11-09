@@ -32,7 +32,7 @@ export const CreateNginxIngress = (
           "nginx.ingress.kubernetes.io/proxy-buffering": "on",
           "nginx.ingress.kubernetes.io/proxy-request-buffering": "on",
           "nginx.ingress.kubernetes.io/proxy-max-temp-file-size": "1024m",
-          "cert-manager.io/issuer": letsEncryptIssuer,
+          "cert-manager.io/cluster-issuer": letsEncryptIssuer,
         },
       },
       spec: {
