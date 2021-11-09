@@ -4,14 +4,14 @@ import { ManagedCertificate } from "../gcp/gke";
 import { CustomResourceOptions, Input } from "@pulumi/pulumi";
 import * as k8s from "@pulumi/kubernetes";
 
-interface CreateIngressArgs extends NamespacedArgs {
+interface CreateGceIngressArgs extends NamespacedArgs {
   address: gcp.compute.GlobalAddress;
   certificate: ManagedCertificate;
   serviceInfo: ServiceInfo;
   domain: Input<string>;
 }
 
-export const CreateIngress = (
+export const CreateGceIngress = (
   name: string,
   {
     namespace,
@@ -20,7 +20,7 @@ export const CreateIngress = (
     serviceInfo,
     domain,
     labels,
-  }: CreateIngressArgs,
+  }: CreateGceIngressArgs,
   options?: CustomResourceOptions
 ): k8s.networking.v1.Ingress => {
   return new k8s.networking.v1.Ingress(

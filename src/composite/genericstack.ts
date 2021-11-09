@@ -1,6 +1,5 @@
-import * as gcp from "@pulumi/gcp";
 import * as k8s from "@pulumi/kubernetes";
-import { ManagedCertificate } from "../gcp/gke/certificate";
+
 import {
   ComponentResource,
   ComponentResourceOptions,
@@ -17,19 +16,17 @@ import {
   ServiceInfo,
   Sidecar,
 } from "../types";
-import { CreateNamespace } from "../k8s/namespace";
-import { CreateHttpProbe } from "../k8s/probe";
-import { CreateDeployment } from "../k8s/deployment";
-import { CreateService } from "../k8s/service";
-import { CreateGceIngress } from "../k8s/gceingress";
-import { CreatePodDisruptionBudget } from "../k8s/disruptionbudget";
-import { CreateDnsRecords } from "../gcp";
-import { CreateCertificate } from "../gcp";
-import { CreateAddress } from "../gcp";
+import { CreateNamespace } from "../k8s";
+import { CreateHttpProbe } from "../k8s";
+import { CreateDeployment } from "../k8s";
+import { CreateService } from "../k8s";
+import { CreatePodDisruptionBudget } from "../k8s";
+import { CreateNginxIngress } from "../k8s/nginxingress";
 
 interface StackArgs extends CommonArgs {
   dnsZoneName: Input<string>;
-  domain: Input<string>;
+  domain?: Input<string>;
+  letsEncryptIssuer: Input<string>;
   replicas?: Input<number>;
   livenessPath?: Input<string>;
   readinessPath?: Input<string>;
@@ -48,16 +45,13 @@ interface StackArgs extends CommonArgs {
     [key: string]: Input<string>;
   }>;
 }
-export class GkeStack extends ComponentResource {
+export class GenericStack extends ComponentResource {
   readonly labels?: Input<{
     [key: string]: Input<string>;
   }>;
   readonly namespace: k8s.core.v1.Namespace;
-  readonly address?: gcp.compute.GlobalAddress;
-  readonly dnsRecords?: gcp.dns.RecordSet;
-  readonly certificate?: ManagedCertificate;
-  readonly readinessProbe: inputs.core.v1.Probe;
-  readonly livenessPorbe: inputs.core.v1.Probe;
+  readonly readinessProbe?: inputs.core.v1.Probe;
+  readonly livenessPorbe?: inputs.core.v1.Probe;
   readonly disruptionBudget?: k8s.policy.v1beta1.PodDisruptionBudget;
   readonly deployment: DeploymentInfo;
   readonly service?: ServiceInfo;
@@ -68,7 +62,7 @@ export class GkeStack extends ComponentResource {
     args: StackArgs,
     options?: ComponentResourceOptions
   ) {
-    super("k8s:gke:stack", name, args, options);
+    super("k8s:composite:stack", name, args, options);
 
     const childOptions = {
       parent: this,
@@ -86,48 +80,20 @@ export class GkeStack extends ComponentResource {
           },
           childOptions
         );
-    this.address = args.container.portNumber
-      ? CreateAddress(
-          `${name}-address`,
-          {
-            labels: this.labels,
-          },
-          childOptions
-        )
+    this.readinessProbe = args.domain
+      ? CreateHttpProbe({
+          path: args.readinessPath || "/healthz",
+          host: args.domain,
+          port: args.container.portNumber,
+        })
       : undefined;
-    this.dnsRecords = this.address
-      ? CreateDnsRecords(
-          `${name}-dns`,
-          {
-            labels: this.labels,
-            dnsZoneName: args.dnsZoneName,
-            domain: args.domain,
-            address: this.address,
-          },
-          childOptions
-        )
+    this.livenessPorbe = args.domain
+      ? CreateHttpProbe({
+          path: args.livenessPath || "/healthz",
+          host: args.domain,
+          port: args.container.portNumber,
+        })
       : undefined;
-    this.certificate = this.dnsRecords
-      ? CreateCertificate(
-          `${name}-cert`,
-          {
-            labels: this.labels,
-            namespace: this.namespace,
-            dnsRecords: this.dnsRecords,
-          },
-          childOptions
-        )
-      : undefined;
-    this.readinessProbe = CreateHttpProbe({
-      path: args.readinessPath || "/healthz",
-      host: args.domain,
-      port: args.container.portNumber,
-    });
-    this.livenessPorbe = CreateHttpProbe({
-      path: args.livenessPath || "/healthz",
-      host: args.domain,
-      port: args.container.portNumber,
-    });
     this.deployment = CreateDeployment(
       `${name}-dep`,
       {
@@ -172,16 +138,15 @@ export class GkeStack extends ComponentResource {
         )
       : undefined;
     this.ingress =
-      this.service && this.certificate && this.address
-        ? CreateGceIngress(
+      this.service && args.domain
+        ? CreateNginxIngress(
             `${name}-ing`,
             {
               namespace: this.namespace,
               labels: this.labels,
-              certificate: this.certificate,
+              letsEncryptIssuer: args.letsEncryptIssuer,
               domain: args.domain,
               serviceInfo: this.service,
-              address: this.address,
             },
             childOptions
           )
