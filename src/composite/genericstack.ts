@@ -24,7 +24,6 @@ import { CreatePodDisruptionBudget } from "../k8s";
 import { CreateNginxIngress } from "../k8s/nginxingress";
 
 interface StackArgs extends CommonArgs {
-  dnsZoneName: Input<string>;
   domain?: Input<string>;
   letsEncryptIssuer: Input<string>;
   replicas?: Input<number>;
