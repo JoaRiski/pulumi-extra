@@ -67,7 +67,7 @@ export class GenericStack extends ComponentResource {
       parent: this,
     };
     this.labels = _.merge({}, args.labels || {}, {
-      gestack: name,
+      genericstack: name,
     });
 
     this.namespace = args.namespace
