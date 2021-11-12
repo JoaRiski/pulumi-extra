@@ -37,10 +37,11 @@ interface StackArgs extends CommonArgs {
   container: {
     env?: ContainerEnv;
     image: Input<string>;
-    portNumber: Input<number>;
+    portNumber?: Input<number>;
     cpu: CpuAllocation;
     memory: MemoryAllocation;
     command?: Input<Input<string>[]>;
+    args?: Input<Input<string>[]>;
   };
   namespace?: k8s.core.v1.Namespace;
   labels?: Input<{
@@ -84,7 +85,7 @@ export class GenericStack extends ComponentResource {
         );
     this.readinessProbe = args.readinessProbe
       ? args.readinessProbe
-      : args.domain
+      : args.domain && args.container.portNumber
       ? CreateHttpProbe({
           path: args.readinessPath || "/healthz",
           host: args.domain,
@@ -93,7 +94,7 @@ export class GenericStack extends ComponentResource {
       : undefined;
     this.livenessProbe = args.livenessProbe
       ? args.livenessProbe
-      : args.domain
+      : args.domain && args.container.portNumber
       ? CreateHttpProbe({
           path: args.livenessPath || "/healthz",
           host: args.domain,
@@ -115,6 +116,7 @@ export class GenericStack extends ComponentResource {
         cpu: args.container.cpu,
         memory: args.container.memory,
         command: args.container.command,
+        args: args.container.args,
       },
       childOptions
     );

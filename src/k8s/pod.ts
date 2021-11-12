@@ -14,6 +14,7 @@ import { CreateContainerTemplate } from "./container";
 interface CreatePodSpecArgs {
   image: Input<string>;
   command?: Input<Input<string>[]>;
+  args?: Input<Input<string>[]>;
   env?: ContainerEnv;
   portNumber?: Input<number>;
   cpu: CpuAllocation;
@@ -43,6 +44,7 @@ export const CreatePodSpec = (
     CreateContainerTemplate(name, {
       image: args.image,
       command: args.command,
+      args: args.args,
       env: args.env,
       port: port,
       cpu: args.cpu,

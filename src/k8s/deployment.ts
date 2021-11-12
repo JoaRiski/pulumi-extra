@@ -14,7 +14,7 @@ import { CreatePodSpec } from "./pod";
 interface CreateDeploymentArgs extends NamespacedArgs {
   image: Input<string>;
   env?: ContainerEnv;
-  portNumber: Input<number>;
+  portNumber?: Input<number>;
   cpu: CpuAllocation;
   memory: MemoryAllocation;
   replicas: Input<number>;
@@ -22,6 +22,7 @@ interface CreateDeploymentArgs extends NamespacedArgs {
   livenessProbe?: Input<inputs.core.v1.Probe>;
   readinessProbe?: Input<inputs.core.v1.Probe>;
   command?: Input<Input<string>[]>;
+  args?: Input<Input<string>[]>;
 }
 
 export const CreateDeployment = (
@@ -39,6 +40,7 @@ export const CreateDeployment = (
     livenessProbe,
     readinessProbe,
     command,
+    args,
   }: CreateDeploymentArgs,
   options?: CustomResourceOptions
 ): DeploymentInfo => {
@@ -52,6 +54,7 @@ export const CreateDeployment = (
     livenessProbe,
     readinessProbe,
     command,
+    args,
   });
   const deployment = new k8s.apps.v1.Deployment(
     name,

@@ -10,6 +10,7 @@ import { input as inputs } from "@pulumi/kubernetes/types";
 interface CreateContainerTemplateArgs {
   image: Input<string>;
   command?: Input<Input<string>[]>;
+  args?: Input<Input<string>[]>;
   env?: ContainerEnv;
   port?: ContainerPort;
   cpu: CpuAllocation;
@@ -25,6 +26,7 @@ export const CreateContainerTemplate = (
   {
     image,
     command,
+    args,
     env,
     port,
     cpu,
@@ -47,6 +49,7 @@ export const CreateContainerTemplate = (
     name: name,
     image: image,
     command: command,
+    args: args,
     ports: ports,
     volumeMounts: volumeMounts,
     securityContext: securityContext,
