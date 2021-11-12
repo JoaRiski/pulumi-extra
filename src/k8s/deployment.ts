@@ -21,6 +21,7 @@ interface CreateDeploymentArgs extends NamespacedArgs {
   sidecars?: Sidecar[];
   livenessProbe?: Input<inputs.core.v1.Probe>;
   readinessProbe?: Input<inputs.core.v1.Probe>;
+  command?: Input<Input<string>[]>;
 }
 
 export const CreateDeployment = (
@@ -37,6 +38,7 @@ export const CreateDeployment = (
     sidecars,
     livenessProbe,
     readinessProbe,
+    command,
   }: CreateDeploymentArgs,
   options?: CustomResourceOptions
 ): DeploymentInfo => {
@@ -49,6 +51,7 @@ export const CreateDeployment = (
     sidecars,
     livenessProbe,
     readinessProbe,
+    command,
   });
   const deployment = new k8s.apps.v1.Deployment(
     name,

@@ -38,6 +38,7 @@ interface StackArgs extends CommonArgs {
     portNumber: Input<number>;
     cpu: CpuAllocation;
     memory: MemoryAllocation;
+    command?: Input<Input<string>[]>;
   };
   namespace?: k8s.core.v1.Namespace;
   labels?: Input<{
@@ -107,6 +108,7 @@ export class GenericStack extends ComponentResource {
         env: args.container.env,
         cpu: args.container.cpu,
         memory: args.container.memory,
+        command: args.container.command,
       },
       childOptions
     );
