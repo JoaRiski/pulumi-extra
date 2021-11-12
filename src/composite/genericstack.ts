@@ -25,7 +25,7 @@ import { CreateNginxIngress } from "../k8s/nginxingress";
 
 interface StackArgs extends CommonArgs {
   domain?: Input<string>;
-  letsEncryptIssuer: Input<string>;
+  letsEncryptIssuer?: Input<string>;
   replicas?: Input<number>;
   livenessPath?: Input<string>;
   readinessPath?: Input<string>;
@@ -147,7 +147,7 @@ export class GenericStack extends ComponentResource {
         )
       : undefined;
     this.ingress =
-      this.service && args.domain
+      this.service && args.domain && args.letsEncryptIssuer
         ? CreateNginxIngress(
             `${name}-ing`,
             {
