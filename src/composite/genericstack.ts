@@ -29,6 +29,8 @@ interface StackArgs extends CommonArgs {
   replicas?: Input<number>;
   livenessPath?: Input<string>;
   readinessPath?: Input<string>;
+  livenessProbe?: inputs.core.v1.Probe;
+  readinessProbe?: inputs.core.v1.Probe;
   minAvailable?: Input<number>;
   maxUnavailable?: Input<number>;
   sidecars?: Sidecar[];
@@ -51,7 +53,7 @@ export class GenericStack extends ComponentResource {
   }>;
   readonly namespace: k8s.core.v1.Namespace;
   readonly readinessProbe?: inputs.core.v1.Probe;
-  readonly livenessPorbe?: inputs.core.v1.Probe;
+  readonly livenessProbe?: inputs.core.v1.Probe;
   readonly disruptionBudget?: k8s.policy.v1beta1.PodDisruptionBudget;
   readonly deployment: DeploymentInfo;
   readonly service?: ServiceInfo;
@@ -80,14 +82,18 @@ export class GenericStack extends ComponentResource {
           },
           childOptions
         );
-    this.readinessProbe = args.domain
+    this.readinessProbe = args.readinessProbe
+      ? args.readinessProbe
+      : args.domain
       ? CreateHttpProbe({
           path: args.readinessPath || "/healthz",
           host: args.domain,
           port: args.container.portNumber,
         })
       : undefined;
-    this.livenessPorbe = args.domain
+    this.livenessProbe = args.livenessProbe
+      ? args.livenessProbe
+      : args.domain
       ? CreateHttpProbe({
           path: args.livenessPath || "/healthz",
           host: args.domain,
@@ -100,7 +106,7 @@ export class GenericStack extends ComponentResource {
         replicas: args.replicas || 1,
         namespace: this.namespace,
         labels: this.labels,
-        livenessProbe: this.livenessPorbe,
+        livenessProbe: this.livenessProbe,
         readinessProbe: this.readinessProbe,
         portNumber: args.container.portNumber,
         image: args.container.image,
