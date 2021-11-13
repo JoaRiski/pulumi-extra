@@ -34,6 +34,7 @@ interface StackArgs extends CommonArgs {
   minAvailable?: Input<number>;
   maxUnavailable?: Input<number>;
   sidecars?: Sidecar[];
+  servicePort?: Input<number>;
   container: {
     env?: ContainerEnv;
     image: Input<string>;
@@ -140,7 +141,7 @@ export class GenericStack extends ComponentResource {
           {
             namespace: this.namespace,
             labels: this.labels,
-            portNumber: 80,
+            portNumber: args.servicePort || 80,
             targetPort: this.deployment.port,
           },
           childOptions
