@@ -1,6 +1,6 @@
 {
   "name": "@joariski/pulumi-extra",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "repository": "https://github.com/JoaRiski/pulumi-k8s-extra",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

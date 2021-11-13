@@ -63,14 +63,6 @@ export const CreateNginxIngress = (
             },
           },
         ],
-        defaultBackend: {
-          service: {
-            name: serviceInfo.service.metadata.name,
-            port: {
-              name: serviceInfo.port.name,
-            },
-          },
-        },
       },
     },
     options
