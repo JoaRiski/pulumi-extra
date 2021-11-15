@@ -14,6 +14,7 @@ interface CreateJobArgs {
     [key: string]: Input<string>;
   }>;
   sidecars?: Sidecar[];
+  waitForFinish: boolean;
   container: {
     env?: ContainerEnv;
     image: Input<string>;
@@ -47,6 +48,9 @@ export const CreateJob = (
       metadata: {
         namespace: args.namespace.metadata.name,
         labels: args.labels,
+        annotations: {
+          "pulumi.com/skipAwait": args.waitForFinish ? "true" : "false",
+        },
       },
       spec: {
         template: {
