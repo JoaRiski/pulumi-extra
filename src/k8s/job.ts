@@ -49,7 +49,7 @@ export const CreateJob = (
         namespace: args.namespace.metadata.name,
         labels: args.labels,
         annotations: {
-          "pulumi.com/skipAwait": args.waitForFinish ? "true" : "false",
+          "pulumi.com/skipAwait": !args.waitForFinish ? "true" : "false",
         },
       },
       spec: {
