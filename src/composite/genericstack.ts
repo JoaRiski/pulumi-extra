@@ -114,6 +114,7 @@ export class GenericStack extends ComponentResource {
         livenessProbe: this.livenessProbe,
         readinessProbe: this.readinessProbe,
         portNumber: args.container.portNumber,
+        extraPorts: args.extraPorts,
         image: args.container.image,
         sidecars: args.sidecars,
         env: args.container.env,

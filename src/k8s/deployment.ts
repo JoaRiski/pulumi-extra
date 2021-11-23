@@ -2,6 +2,7 @@ import {
   ContainerEnv,
   CpuAllocation,
   DeploymentInfo,
+  ExtraPort,
   MemoryAllocation,
   NamespacedArgs,
   Sidecar,
@@ -15,6 +16,7 @@ interface CreateDeploymentArgs extends NamespacedArgs {
   image: Input<string>;
   env?: ContainerEnv;
   portNumber?: Input<number>;
+  extraPorts?: ExtraPort[];
   cpu: CpuAllocation;
   memory: MemoryAllocation;
   replicas: Input<number>;
@@ -32,6 +34,7 @@ export const CreateDeployment = (
     image,
     env,
     portNumber,
+    extraPorts,
     labels,
     cpu,
     memory,
@@ -48,6 +51,7 @@ export const CreateDeployment = (
     image,
     env,
     portNumber,
+    extraPorts,
     cpu,
     memory,
     sidecars,
