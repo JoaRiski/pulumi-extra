@@ -1,5 +1,6 @@
 import {
   ContainerPort,
+  ExtraPort,
   NamespacedArgs,
   ServiceInfo,
   ServicePort,
@@ -10,11 +11,12 @@ import * as k8s from "@pulumi/kubernetes";
 interface CreateServiceArgs extends NamespacedArgs {
   portNumber: Input<number>;
   targetPort: ContainerPort;
+  extraPorts?: ExtraPort[];
 }
 
 export const CreateService = (
   name: string,
-  { namespace, labels, portNumber, targetPort }: CreateServiceArgs,
+  { namespace, labels, portNumber, targetPort, extraPorts }: CreateServiceArgs,
   options?: CustomResourceOptions
 ): ServiceInfo => {
   const port: ServicePort = {
@@ -22,6 +24,12 @@ export const CreateService = (
     name: "svc-port",
     port: portNumber,
   };
+  const ports = (extraPorts || []).map((x) => ({
+    protocol: x.protocol,
+    port: x.port,
+    targetPort: x.name,
+    name: x.name,
+  }));
   const service = new k8s.core.v1.Service(
     name,
     {
@@ -37,6 +45,7 @@ export const CreateService = (
             targetPort: targetPort.name,
             name: port.name,
           },
+          ...ports,
         ],
         type: "NodePort",
         selector: labels,

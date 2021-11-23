@@ -3,6 +3,7 @@ import {
   ContainerEnv,
   ContainerPort,
   CpuAllocation,
+  ExtraPort,
   MemoryAllocation,
 } from "../types";
 import { input as inputs } from "@pulumi/kubernetes/types";
@@ -13,6 +14,7 @@ interface CreateContainerTemplateArgs {
   args?: Input<Input<string>[]>;
   env?: ContainerEnv;
   port?: ContainerPort;
+  extraPorts?: ExtraPort[];
   cpu: CpuAllocation;
   memory: MemoryAllocation;
   volumeMounts?: Input<Input<inputs.core.v1.VolumeMount>[]>;
@@ -29,6 +31,7 @@ export const CreateContainerTemplate = (
     args,
     env,
     port,
+    extraPorts,
     cpu,
     memory,
     volumeMounts,
@@ -45,6 +48,14 @@ export const CreateContainerTemplate = (
   if (env && env.secret) {
     envFrom.push({ secretRef: { name: env.secret.metadata.name } });
   }
+
+  for (const x of extraPorts || []) {
+    ports.push({
+      containerPort: x.port,
+      name: x.name,
+    });
+  }
+
   return {
     name: name,
     image: image,

@@ -12,8 +12,10 @@ import {
   ContainerEnv,
   CpuAllocation,
   DeploymentInfo,
+  ExtraPort,
   MemoryAllocation,
   ServiceInfo,
+  ServicePort,
   Sidecar,
 } from "../types";
 import { CreateNamespace } from "../k8s";
@@ -35,6 +37,7 @@ interface StackArgs extends CommonArgs {
   maxUnavailable?: Input<number>;
   sidecars?: Sidecar[];
   servicePort?: Input<number>;
+  extraPorts?: ExtraPort[];
   container: {
     env?: ContainerEnv;
     image: Input<string>;
@@ -143,6 +146,7 @@ export class GenericStack extends ComponentResource {
             labels: this.labels,
             portNumber: args.servicePort || 80,
             targetPort: this.deployment.port,
+            extraPorts: args.extraPorts,
           },
           childOptions
         )

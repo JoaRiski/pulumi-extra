@@ -10,6 +10,11 @@ export type Port<T extends string> = {
 };
 export type ContainerPort = Port<"Container">;
 export type ServicePort = Port<"Service">;
+export type ExtraPort = {
+  name: string;
+  port: Input<number>;
+  protocol?: string;
+};
 export type DeploymentInfo = {
   port?: ContainerPort;
   deployment: k8s.apps.v1.Deployment;
