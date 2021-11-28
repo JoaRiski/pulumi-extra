@@ -1,6 +1,6 @@
 import * as gcp from "@pulumi/gcp";
 import * as k8s from "@pulumi/kubernetes";
-import { ManagedCertificate } from "../gcp/gke/certificate";
+import { ManagedCertificate } from "../gcp/gke";
 import {
   ComponentResource,
   ComponentResourceOptions,
@@ -13,35 +13,42 @@ import {
   ContainerEnv,
   CpuAllocation,
   DeploymentInfo,
+  ExtraPort,
   MemoryAllocation,
   ServiceInfo,
   Sidecar,
 } from "../types";
-import { CreateNamespace } from "../k8s/namespace";
-import { CreateHttpProbe } from "../k8s/probe";
-import { CreateDeployment } from "../k8s/deployment";
-import { CreateService } from "../k8s/service";
-import { CreateGceIngress } from "../k8s/gceingress";
-import { CreatePodDisruptionBudget } from "../k8s/disruptionbudget";
+import { CreateNamespace } from "../k8s";
+import { CreateHttpProbe } from "../k8s";
+import { CreateDeployment } from "../k8s";
+import { CreateService } from "../k8s";
+import { CreateGceIngress } from "../k8s";
+import { CreatePodDisruptionBudget } from "../k8s";
 import { CreateDnsRecords } from "../gcp";
 import { CreateCertificate } from "../gcp";
 import { CreateAddress } from "../gcp";
 
 interface StackArgs extends CommonArgs {
-  dnsZoneName: Input<string>;
-  domain: Input<string>;
+  dnsZoneName?: Input<string>;
+  domain?: Input<string>;
   replicas?: Input<number>;
   livenessPath?: Input<string>;
   readinessPath?: Input<string>;
+  livenessProbe?: inputs.core.v1.Probe;
+  readinessProbe?: inputs.core.v1.Probe;
   minAvailable?: Input<number>;
   maxUnavailable?: Input<number>;
   sidecars?: Sidecar[];
+  servicePort?: Input<number>;
+  extraPorts?: ExtraPort[];
   container: {
     env?: ContainerEnv;
     image: Input<string>;
-    portNumber: Input<number>;
+    portNumber?: Input<number>;
     cpu: CpuAllocation;
     memory: MemoryAllocation;
+    command?: Input<Input<string>[]>;
+    args?: Input<Input<string>[]>;
   };
   namespace?: k8s.core.v1.Namespace;
   labels?: Input<{
@@ -56,8 +63,8 @@ export class GkeStack extends ComponentResource {
   readonly address?: gcp.compute.GlobalAddress;
   readonly dnsRecords?: gcp.dns.RecordSet;
   readonly certificate?: ManagedCertificate;
-  readonly readinessProbe: inputs.core.v1.Probe;
-  readonly livenessPorbe: inputs.core.v1.Probe;
+  readonly readinessProbe?: inputs.core.v1.Probe;
+  readonly livenessProbe?: inputs.core.v1.Probe;
   readonly disruptionBudget?: k8s.policy.v1beta1.PodDisruptionBudget;
   readonly deployment: DeploymentInfo;
   readonly service?: ServiceInfo;
@@ -86,27 +93,29 @@ export class GkeStack extends ComponentResource {
           },
           childOptions
         );
-    this.address = args.container.portNumber
-      ? CreateAddress(
-          `${name}-address`,
-          {
-            labels: this.labels,
-          },
-          childOptions
-        )
-      : undefined;
-    this.dnsRecords = this.address
-      ? CreateDnsRecords(
-          `${name}-dns`,
-          {
-            labels: this.labels,
-            dnsZoneName: args.dnsZoneName,
-            domain: args.domain,
-            address: this.address,
-          },
-          childOptions
-        )
-      : undefined;
+    this.address =
+      args.container.portNumber && args.dnsZoneName && args.domain
+        ? CreateAddress(
+            `${name}-address`,
+            {
+              labels: this.labels,
+            },
+            childOptions
+          )
+        : undefined;
+    this.dnsRecords =
+      this.address && args.dnsZoneName && args.domain
+        ? CreateDnsRecords(
+            `${name}-dns`,
+            {
+              labels: this.labels,
+              dnsZoneName: args.dnsZoneName,
+              domain: args.domain,
+              address: this.address,
+            },
+            childOptions
+          )
+        : undefined;
     this.certificate = this.dnsRecords
       ? CreateCertificate(
           `${name}-cert`,
@@ -118,30 +127,41 @@ export class GkeStack extends ComponentResource {
           childOptions
         )
       : undefined;
-    this.readinessProbe = CreateHttpProbe({
-      path: args.readinessPath || "/healthz",
-      host: args.domain,
-      port: args.container.portNumber,
-    });
-    this.livenessPorbe = CreateHttpProbe({
-      path: args.livenessPath || "/healthz",
-      host: args.domain,
-      port: args.container.portNumber,
-    });
+    this.readinessProbe = args.readinessProbe
+      ? args.readinessProbe
+      : args.domain && args.container.portNumber
+      ? CreateHttpProbe({
+          path: args.readinessPath || "/healthz",
+          host: args.domain,
+          port: args.container.portNumber,
+        })
+      : undefined;
+    this.livenessProbe = args.livenessProbe
+      ? args.livenessProbe
+      : args.domain && args.container.portNumber
+      ? CreateHttpProbe({
+          path: args.livenessPath || "/healthz",
+          host: args.domain,
+          port: args.container.portNumber,
+        })
+      : undefined;
     this.deployment = CreateDeployment(
       `${name}-dep`,
       {
         replicas: args.replicas || 1,
         namespace: this.namespace,
         labels: this.labels,
-        livenessProbe: this.livenessPorbe,
+        livenessProbe: this.livenessProbe,
         readinessProbe: this.readinessProbe,
         portNumber: args.container.portNumber,
+        extraPorts: args.extraPorts,
         image: args.container.image,
         sidecars: args.sidecars,
         env: args.container.env,
         cpu: args.container.cpu,
         memory: args.container.memory,
+        command: args.container.command,
+        args: args.container.args,
       },
       childOptions
     );
@@ -165,14 +185,19 @@ export class GkeStack extends ComponentResource {
           {
             namespace: this.namespace,
             labels: this.labels,
-            portNumber: 80,
+            portNumber: args.servicePort || 80,
             targetPort: this.deployment.port,
+            extraPorts: args.extraPorts,
           },
           childOptions
         )
       : undefined;
     this.ingress =
-      this.service && this.certificate && this.address
+      this.service &&
+      this.certificate &&
+      this.address &&
+      args.domain &&
+      args.dnsZoneName
         ? CreateGceIngress(
             `${name}-ing`,
             {

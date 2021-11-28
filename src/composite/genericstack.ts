@@ -15,7 +15,6 @@ import {
   ExtraPort,
   MemoryAllocation,
   ServiceInfo,
-  ServicePort,
   Sidecar,
 } from "../types";
 import { CreateNamespace } from "../k8s";
