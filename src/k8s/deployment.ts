@@ -11,6 +11,8 @@ import { CustomResourceOptions, Input } from "@pulumi/pulumi";
 import { input as inputs } from "@pulumi/kubernetes/types";
 import * as k8s from "@pulumi/kubernetes";
 import { CreatePodSpec } from "./pod";
+import { apps } from "@pulumi/kubernetes/types/input";
+import DeploymentStrategy = apps.v1.DeploymentStrategy;
 
 interface CreateDeploymentArgs extends NamespacedArgs {
   image: Input<string>;
@@ -25,6 +27,7 @@ interface CreateDeploymentArgs extends NamespacedArgs {
   readinessProbe?: Input<inputs.core.v1.Probe>;
   command?: Input<Input<string>[]>;
   args?: Input<Input<string>[]>;
+  strategy?: DeploymentStrategy;
 }
 
 export const CreateDeployment = (
@@ -44,6 +47,7 @@ export const CreateDeployment = (
     readinessProbe,
     command,
     args,
+    strategy,
   }: CreateDeploymentArgs,
   options?: CustomResourceOptions
 ): DeploymentInfo => {
@@ -78,6 +82,7 @@ export const CreateDeployment = (
           },
           spec: pod.spec,
         },
+        strategy: strategy,
       },
     },
     options

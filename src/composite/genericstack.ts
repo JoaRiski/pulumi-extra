@@ -23,6 +23,8 @@ import { CreateDeployment } from "../k8s";
 import { CreateService } from "../k8s";
 import { CreatePodDisruptionBudget } from "../k8s";
 import { CreateNginxIngress } from "../k8s/nginxingress";
+import { apps } from "@pulumi/kubernetes/types/input";
+import DeploymentStrategy = apps.v1.DeploymentStrategy;
 
 interface StackArgs extends CommonArgs {
   domain?: Input<string>;
@@ -37,6 +39,7 @@ interface StackArgs extends CommonArgs {
   sidecars?: Sidecar[];
   servicePort?: Input<number>;
   extraPorts?: ExtraPort[];
+  strategy?: DeploymentStrategy;
   container: {
     env?: ContainerEnv;
     image: Input<string>;
@@ -121,6 +124,7 @@ export class GenericStack extends ComponentResource {
         memory: args.container.memory,
         command: args.container.command,
         args: args.container.args,
+        strategy: args.strategy,
       },
       childOptions
     );

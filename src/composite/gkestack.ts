@@ -27,6 +27,8 @@ import { CreatePodDisruptionBudget } from "../k8s";
 import { CreateDnsRecords } from "../gcp";
 import { CreateCertificate } from "../gcp";
 import { CreateAddress } from "../gcp";
+import { apps } from "@pulumi/kubernetes/types/input";
+import DeploymentStrategy = apps.v1.DeploymentStrategy;
 
 interface StackArgs extends CommonArgs {
   dnsZoneName?: Input<string>;
@@ -41,6 +43,7 @@ interface StackArgs extends CommonArgs {
   sidecars?: Sidecar[];
   servicePort?: Input<number>;
   extraPorts?: ExtraPort[];
+  strategy?: DeploymentStrategy;
   container: {
     env?: ContainerEnv;
     image: Input<string>;
@@ -162,6 +165,7 @@ export class GkeStack extends ComponentResource {
         memory: args.container.memory,
         command: args.container.command,
         args: args.container.args,
+        strategy: args.strategy,
       },
       childOptions
     );
