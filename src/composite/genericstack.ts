@@ -32,8 +32,8 @@ interface StackArgs extends CommonArgs {
   replicas?: Input<number>;
   livenessPath?: Input<string>;
   readinessPath?: Input<string>;
-  livenessProbe?: inputs.core.v1.Probe;
-  readinessProbe?: inputs.core.v1.Probe;
+  livenessProbe?: inputs.core.v1.Probe | null;
+  readinessProbe?: inputs.core.v1.Probe | null;
   minAvailable?: Input<number>;
   maxUnavailable?: Input<number>;
   sidecars?: Sidecar[];
@@ -59,8 +59,8 @@ export class GenericStack extends ComponentResource {
     [key: string]: Input<string>;
   }>;
   readonly namespace: k8s.core.v1.Namespace;
-  readonly readinessProbe?: inputs.core.v1.Probe;
-  readonly livenessProbe?: inputs.core.v1.Probe;
+  readonly readinessProbe?: inputs.core.v1.Probe | null;
+  readonly livenessProbe?: inputs.core.v1.Probe | null;
   readonly disruptionBudget?: k8s.policy.v1beta1.PodDisruptionBudget;
   readonly deployment: DeploymentInfo;
   readonly service?: ServiceInfo;
@@ -89,32 +89,34 @@ export class GenericStack extends ComponentResource {
           },
           childOptions
         );
-    this.readinessProbe = args.readinessProbe
-      ? args.readinessProbe
-      : args.domain && args.container.portNumber
-      ? CreateHttpProbe({
-          path: args.readinessPath || "/healthz",
-          host: args.domain,
-          port: args.container.portNumber,
-        })
-      : undefined;
-    this.livenessProbe = args.livenessProbe
-      ? args.livenessProbe
-      : args.domain && args.container.portNumber
-      ? CreateHttpProbe({
-          path: args.livenessPath || "/healthz",
-          host: args.domain,
-          port: args.container.portNumber,
-        })
-      : undefined;
+    this.readinessProbe =
+      args.readinessProbe !== undefined
+        ? args.readinessProbe
+        : args.domain && args.container.portNumber
+        ? CreateHttpProbe({
+            path: args.readinessPath || "/healthz",
+            host: args.domain,
+            port: args.container.portNumber,
+          })
+        : undefined;
+    this.livenessProbe =
+      args.livenessProbe !== undefined
+        ? args.livenessProbe
+        : args.domain && args.container.portNumber
+        ? CreateHttpProbe({
+            path: args.livenessPath || "/healthz",
+            host: args.domain,
+            port: args.container.portNumber,
+          })
+        : undefined;
     this.deployment = CreateDeployment(
       `${name}-dep`,
       {
         replicas: args.replicas || 1,
         namespace: this.namespace,
         labels: this.labels,
-        livenessProbe: this.livenessProbe,
-        readinessProbe: this.readinessProbe,
+        livenessProbe: this.livenessProbe ?? undefined,
+        readinessProbe: this.readinessProbe ?? undefined,
         portNumber: args.container.portNumber,
         extraPorts: args.extraPorts,
         image: args.container.image,
