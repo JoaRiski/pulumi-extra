@@ -44,6 +44,7 @@ interface StackArgs extends CommonArgs {
     env?: ContainerEnv;
     image: Input<string>;
     portNumber?: Input<number>;
+    volumeMounts?: Input<Input<inputs.core.v1.VolumeMount>[]>;
     cpu: CpuAllocation;
     memory: MemoryAllocation;
     command?: Input<Input<string>[]>;
@@ -119,6 +120,7 @@ export class GenericStack extends ComponentResource {
         readinessProbe: this.readinessProbe ?? undefined,
         portNumber: args.container.portNumber,
         extraPorts: args.extraPorts,
+        volumeMounts: args.container.volumeMounts,
         image: args.container.image,
         sidecars: args.sidecars,
         env: args.container.env,

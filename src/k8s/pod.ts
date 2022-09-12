@@ -19,6 +19,7 @@ interface CreatePodSpecArgs {
   env?: ContainerEnv;
   portNumber?: Input<number>;
   extraPorts?: ExtraPort[];
+  volumeMounts?: Input<Input<inputs.core.v1.VolumeMount>[]>;
   cpu: CpuAllocation;
   memory: MemoryAllocation;
   sidecars?: Sidecar[];
@@ -50,6 +51,7 @@ export const CreatePodSpec = (
       env: args.env,
       port: port,
       extraPorts: args.extraPorts,
+      volumeMounts: args.volumeMounts,
       cpu: args.cpu,
       memory: args.memory,
       livenessProbe: args.livenessProbe,

@@ -19,6 +19,7 @@ interface CreateDeploymentArgs extends NamespacedArgs {
   env?: ContainerEnv;
   portNumber?: Input<number>;
   extraPorts?: ExtraPort[];
+  volumeMounts?: Input<Input<inputs.core.v1.VolumeMount>[]>;
   cpu: CpuAllocation;
   memory: MemoryAllocation;
   replicas: Input<number>;
@@ -38,6 +39,7 @@ export const CreateDeployment = (
     env,
     portNumber,
     extraPorts,
+    volumeMounts,
     labels,
     cpu,
     memory,
@@ -56,6 +58,7 @@ export const CreateDeployment = (
     env,
     portNumber,
     extraPorts,
+    volumeMounts,
     cpu,
     memory,
     sidecars,
