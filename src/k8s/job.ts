@@ -21,6 +21,7 @@ interface CreateJobArgs {
     cpu: CpuAllocation;
     memory: MemoryAllocation;
     command?: Input<Input<string>[]>;
+    args?: Input<Input<string>[]>;
   };
   shareProcessNamespace?: Input<boolean>;
   restartPolicy?: "OnFailure" | "Never";
@@ -35,6 +36,7 @@ export const CreateJob = (
   const pod = CreatePodSpec(`${name}-cont`, {
     image: args.container.image,
     command: args.container.command,
+    args: args.container.args,
     env: args.container.env,
     cpu: args.container.cpu,
     memory: args.container.memory,
