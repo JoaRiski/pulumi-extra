@@ -29,6 +29,7 @@ interface CreateDeploymentArgs extends NamespacedArgs {
   command?: Input<Input<string>[]>;
   args?: Input<Input<string>[]>;
   strategy?: DeploymentStrategy;
+  annotations?: Input<{ [key: string]: Input<string> }>;
 }
 
 export const CreateDeployment = (
@@ -50,6 +51,7 @@ export const CreateDeployment = (
     command,
     args,
     strategy,
+    annotations,
   }: CreateDeploymentArgs,
   options?: CustomResourceOptions
 ): DeploymentInfo => {
@@ -72,6 +74,7 @@ export const CreateDeployment = (
     {
       metadata: {
         namespace: namespace.metadata.name,
+        annotations: annotations,
         labels: labels,
       },
       spec: {

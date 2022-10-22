@@ -51,6 +51,7 @@ interface StackArgs extends CommonArgs {
     args?: Input<Input<string>[]>;
   };
   namespace?: k8s.core.v1.Namespace;
+  annotations?: Input<{ [key: string]: Input<string> }>;
   labels?: Input<{
     [key: string]: Input<string>;
   }>;
@@ -129,6 +130,7 @@ export class GenericStack extends ComponentResource {
         command: args.container.command,
         args: args.container.args,
         strategy: args.strategy,
+        annotations: args.annotations,
       },
       childOptions
     );
