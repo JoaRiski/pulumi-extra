@@ -14,6 +14,7 @@ import { CreateContainerTemplate } from "./container";
 
 interface CreatePodSpecArgs {
   image: Input<string>;
+  imagePullSecrets?: Input<Input<inputs.core.v1.LocalObjectReference>[]>;
   command?: Input<Input<string>[]>;
   args?: Input<Input<string>[]>;
   env?: ContainerEnv;
@@ -64,6 +65,7 @@ export const CreatePodSpec = (
   return {
     spec: {
       containers: containers,
+      imagePullSecrets: args.imagePullSecrets,
       volumes: volumes,
       restartPolicy: args.restartPolicy,
       shareProcessNamespace: args.shareProcessNamespace,

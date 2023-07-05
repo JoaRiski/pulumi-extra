@@ -16,6 +16,7 @@ import DeploymentStrategy = apps.v1.DeploymentStrategy;
 
 interface CreateDeploymentArgs extends NamespacedArgs {
   image: Input<string>;
+  imagePullSecrets?: Input<Input<inputs.core.v1.LocalObjectReference>[]>;
   env?: ContainerEnv;
   portNumber?: Input<number>;
   extraPorts?: ExtraPort[];
@@ -37,6 +38,7 @@ export const CreateDeployment = (
   {
     namespace,
     image,
+    imagePullSecrets,
     env,
     portNumber,
     extraPorts,
@@ -57,6 +59,7 @@ export const CreateDeployment = (
 ): DeploymentInfo => {
   const pod = CreatePodSpec(`${name}-cont`, {
     image,
+    imagePullSecrets,
     env,
     portNumber,
     extraPorts,

@@ -50,6 +50,7 @@ interface StackArgs extends CommonArgs {
     command?: Input<Input<string>[]>;
     args?: Input<Input<string>[]>;
   };
+  imagePullSecrets?: Input<Input<inputs.core.v1.LocalObjectReference>[]>;
   namespace?: k8s.core.v1.Namespace;
   annotations?: Input<{ [key: string]: Input<string> }>;
   labels?: Input<{
@@ -123,6 +124,7 @@ export class GenericStack extends ComponentResource {
         extraPorts: args.extraPorts,
         volumeMounts: args.container.volumeMounts,
         image: args.container.image,
+        imagePullSecrets: args.imagePullSecrets,
         sidecars: args.sidecars,
         env: args.container.env,
         cpu: args.container.cpu,
