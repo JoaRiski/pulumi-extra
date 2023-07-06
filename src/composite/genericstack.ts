@@ -115,7 +115,7 @@ export class GenericStack extends ComponentResource {
     this.deployment = CreateDeployment(
       `${name}-dep`,
       {
-        replicas: args.replicas || 1,
+        replicas: args.replicas ?? 1,
         namespace: this.namespace,
         labels: this.labels,
         livenessProbe: this.livenessProbe ?? undefined,
