@@ -6,6 +6,7 @@ interface CreateNginxIngressArgs extends NamespacedArgs {
   letsEncryptIssuer: Input<string>;
   serviceInfo: ServiceInfo;
   domain: Input<string>;
+  annotations?: Input<{ [key: string]: Input<string> }>;
 }
 
 export const CreateNginxIngress = (
@@ -16,6 +17,7 @@ export const CreateNginxIngress = (
     serviceInfo,
     domain,
     labels,
+    annotations,
   }: CreateNginxIngressArgs,
   options?: CustomResourceOptions
 ): k8s.networking.v1.Ingress => {
@@ -33,6 +35,7 @@ export const CreateNginxIngress = (
           "nginx.ingress.kubernetes.io/proxy-request-buffering": "on",
           "nginx.ingress.kubernetes.io/proxy-max-temp-file-size": "1024m",
           "cert-manager.io/cluster-issuer": letsEncryptIssuer,
+          ...(annotations ?? {}),
         },
       },
       spec: {

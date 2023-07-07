@@ -53,6 +53,7 @@ interface StackArgs extends CommonArgs {
   imagePullSecrets?: Input<Input<inputs.core.v1.LocalObjectReference>[]>;
   namespace?: k8s.core.v1.Namespace;
   annotations?: Input<{ [key: string]: Input<string> }>;
+  ingressAnnotations?: Input<{ [key: string]: Input<string> }>;
   labels?: Input<{
     [key: string]: Input<string>;
   }>;
@@ -173,6 +174,7 @@ export class GenericStack extends ComponentResource {
               letsEncryptIssuer: args.letsEncryptIssuer,
               domain: args.domain,
               serviceInfo: this.service,
+              annotations: args.ingressAnnotations,
             },
             childOptions
           )
